@@ -8,10 +8,41 @@ In this implementation we use a 3 layer structure with PyTorch
 
 import torch
 import torch.nn as nn
+from torch.utils.data import Dataset, DataLoader
+from torchvision import datasets
 from util import get_input_label_split, get_accuracy, get_precision
 import argparse
 import numpy as np
 import pandas as pd
+
+
+class HeartTrainDataset(Dataset):
+    def __init__(self, data, label_name):
+        self.X, self.y = get_input_label_split(data, label_name)
+    
+    def __getitem__(self, index):
+        features = self.X[index]
+        feat_tensor = torch.tensor(features, dtype=torch.float32)
+
+        label = self.y[index]
+        label = np.expand_dims(label, axis=0)
+        label_tensor = torch.tensor(label, dtype=torch.float32)
+
+        return feat_tensor, label_tensor
+    
+    def __len__(self):
+        return len(self.X)
+
+class HeartTestDataset(Dataset):
+    def __init__(self, data):
+        self.X = data
+    
+    def __getitem__(self, index):
+        features = self.X[index]
+        return torch.tensor(features, dtype=torch.float32)
+    
+    def __len__(self):
+        return len(self.X)
 
 
 class NeuralNet(nn.Module):
@@ -41,45 +72,56 @@ class FFNN:
         self.device = device
     
     def train(self, data, label_name, lr=7e-4, num_epochs=5):
-        train_x, train_y = get_input_label_split(data, label_name)
 
-        # convert training data to torch
-        self.train_x = torch.tensor(train_x, dtype=torch.float32).to(self.device)
-        self.train_y = torch.tensor(train_y, dtype=torch.float32).to(self.device)
+        dataset = HeartTrainDataset(data, label_name)
+        train_loader = DataLoader(
+            dataset=dataset,
+            batch_size=16,
+            shuffle=True,
+        )
 
-        input_size = self.train_x.shape[1]
+        input_size = data.shape[1] - 1
         self.model = NeuralNet(input_size, 128, 128, 1).to(self.device)
 
         # loss and optimizer
         optimizer = torch.optim.Adam(self.model.parameters(), lr=lr)
         criterion = nn.BCELoss()
 
-        num_steps = len(self.train_x)
+        num_steps = len(train_loader)
 
         for t in range(num_epochs):
-            for i in range(num_steps):
-                features = self.train_x[i].reshape(1,-1).to(self.device)
-                label = self.train_y[i].reshape(1,-1).to(self.device)
+            for i, (features, labels) in enumerate(train_loader):
+                features = features.to(self.device)
+                labels = labels.to(self.device)
 
-                output = self.model(features)
-                loss = criterion(output, label)
+                outputs = self.model(features)
+                loss = criterion(outputs, labels)
 
                 # backward prop
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
 
-                if (i + 1) % 100 == 0:
-                    print(f"Epoch {t}: {i} steps have elasped. Current loss {loss.item()}")
+                if (i + 1) % 4 == 0:
+                    print(f"Epoch {t}: {i}/{num_steps} steps have elasped. Current loss {loss.item()}")
     
 
     def infer(self, data):
-        test_x = torch.tensor(data, dtype=torch.float32).to(self.device)
+        test_x = HeartTestDataset(data)
+        test_loader = DataLoader(
+            dataset=test_x,
+            batch_size=16,
+            shuffle=False
+        )
 
         with torch.no_grad():
-            outputs = self.model(test_x)
-            predicted = np.sign(outputs.cpu().data)
-            return predicted
+            pred = []
+            for features in test_loader:
+                features = features.to(self.device)
+                outputs = self.model(features)
+                predicted = np.sign(outputs.cpu().data)
+                pred += predicted
+            return pred
 
 
 if __name__ == '__main__':
