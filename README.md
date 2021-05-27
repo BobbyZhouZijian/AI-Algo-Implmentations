@@ -14,9 +14,12 @@ Example of testing command:
             - kNN
             - NB
         - Deep learning models (implemented using PyTorch)
-            - TODO
+            - FFNN
+            - CNN
+            - GoogleNet (TODO)
+            - ResNet (TODO)
     - Regressions
-        - TODO
+        - (TODO)
     - Reinforcement Learning
         - Q-learning
         - Double Q-learning

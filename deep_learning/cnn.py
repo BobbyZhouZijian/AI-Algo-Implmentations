@@ -27,6 +27,7 @@ class ConvNet(nn.Module):
         self.layer1 = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
+            # use hard sigmoid to speed up training
             Sigmoid(hard=True),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
