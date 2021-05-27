@@ -20,6 +20,8 @@ import torchvision.transforms as transforms
 
 from activations.sigmoid import Sigmoid
 
+__all__ = ['CNN']
+
 class ConvNet(nn.Module):
     '''Convolutional Network Model builder'''
     def __init__(self, H, W, num_classes=10):

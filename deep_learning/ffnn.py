@@ -15,6 +15,7 @@ import argparse
 import numpy as np
 import pandas as pd
 
+__all__ = ['FFNN']
 
 class HeartTrainDataset(Dataset):
     def __init__(self, data, label_name):
