@@ -18,6 +18,7 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 
+from activations.sigmoid import Sigmoid
 
 class ConvNet(nn.Module):
     '''Convolutional Network Model builder'''
@@ -26,7 +27,7 @@ class ConvNet(nn.Module):
         self.layer1 = nn.Sequential(
             nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
-            nn.ReLU(),
+            Sigmoid(hard=True),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         # calcualte new H and new W
@@ -35,7 +36,7 @@ class ConvNet(nn.Module):
         self.layer2 = nn.Sequential(
             nn.Conv2d(16, 32, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(32),
-            nn.ReLU(),
+            Sigmoid(hard=True),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         H = H // 2
@@ -96,7 +97,7 @@ class CNN:
                 optimizer.step()
             
                 if (i+1) % 100 == 0:
-                    print(f"epoch: {t}/{num_epochs}, step: {i}/{num_steps}, loss: {loss.item()}")
+                    print(f"epoch: {t+1}/{num_epochs}, step: {i+1}/{num_steps}, loss: {loss.item()}")
     
     def infer(self, images):
         '''
