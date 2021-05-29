@@ -113,7 +113,6 @@ class GoogLeNet(nn.Module):
         num_classes,
         in_channels=3,
         aux_logits=False,
-        transform_input=False
     ):
         super(GoogLeNet, self).__init__()
         blocks = [BasicConv2d, Inception, InceptionAux]
@@ -123,7 +122,6 @@ class GoogLeNet(nn.Module):
         inception_aux_block = blocks[2]
 
         self.aux_logits = aux_logits
-        self.transform_input = transform_input
 
         self.conv1 = conv_block(in_channels, 64, kernel_size=7, stride=2, padding=3)
         self.maxpool1 = nn.MaxPool2d(3, stride=2, ceil_mode=True)
@@ -170,14 +168,6 @@ class GoogLeNet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-    
-    def _transform_input(self, x):
-        if self.transform_input:
-            x_ch0 = torch.unsqueeze(x[:,0], 1) * (0.229 / 0.5) + (0.485 - 0.5) / 0.5
-            x_ch1 = torch.unsqueeze(x[:,1], 1) * (0.229 / 0.5) + (0.485 - 0.5) / 0.5
-            x_ch2 = torch.unsqueeze(x[:,2], 1) * (0.229 / 0.5) + (0.485 - 0.5) / 0.5
-            x = torch.cat((x_ch0, x_ch1, x_ch2), 1)
-        return x
     
     def _forward(self, x):
         # 3 * 224 * 224
@@ -235,7 +225,6 @@ class GoogLeNet(nn.Module):
     
 
     def forward(self, x):
-        x = self._transform_input(x)
         x, aux1, aux2 = self._forward(x)
 
         aux_defined = self.training and self.aux_logits
@@ -247,9 +236,8 @@ class GoogLeNet(nn.Module):
 
 
 class ModelTrainer:
-    def __init__(self, aux_logits=True, transform_inputs=True, device='cuda'):
+    def __init__(self, aux_logits=True, device='cuda'):
         self.aux_logits = aux_logits,
-        self.transform_inputs = transform_inputs
         self.model = None
         self.device = device
     
@@ -272,7 +260,6 @@ class ModelTrainer:
             num_classes,
             in_channels=3,
             aux_logits=self.aux_logits,
-            transform_input=self.transform_inputs
         ).to(device=self.device)
 
         # build data loader

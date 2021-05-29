@@ -16,7 +16,7 @@ Example of testing command:
         - Deep learning models (implemented using PyTorch)
             - FFNN
             - CNN
-            - GoogLeNet (TODO)
+            - GoogLeNet
             - ResNet (TODO)
     - Regressions
         - (TODO)
