@@ -27,7 +27,7 @@ class ConvNet(nn.Module):
     def __init__(self, H, W, num_classes=10):
         super(ConvNet, self).__init__()
         self.layer1 = nn.Sequential(
-            nn.Conv2d(1, 16, kernel_size=5, stride=1, padding=2),
+            nn.Conv2d(3, 16, kernel_size=5, stride=1, padding=2),
             nn.BatchNorm2d(16),
             # use hard sigmoid to speed up training
             Sigmoid(hard=True),
@@ -50,7 +50,7 @@ class ConvNet(nn.Module):
     def forward(self, x):
         out = self.layer1(x)
         out = self.layer2(out)
-        out = out.reshape(len(out), -1)
+        out = torch.flatten(out, 1)
         out = self.fc(out)
         return out
     
@@ -146,10 +146,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     download = True
-    if os.path.exists(args.file_path+'/MNIST/'):
+    if os.path.exists(args.file_path+'/CIFAR10/'):
         download = False
 
-    train_data = torchvision.datasets.MNIST(
+    train_data = torchvision.datasets.CIFAR10(
         root=args.file_path,
         train=True,
         transform=transforms.ToTensor(),
@@ -157,10 +157,10 @@ if __name__ == '__main__':
     )
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print(f'using {device} as the training device...')
-    net = CNN(28, 28, device=device)
+    net = CNN(32, 32, device=device)
     net.train(train_data)
     if args.eval_mode:
-        test_data = torchvision.datasets.MNIST(
+        test_data = torchvision.datasets.CIFAR10(
             root=args.file_path,
             train=False,
             transform=transforms.ToTensor(),
