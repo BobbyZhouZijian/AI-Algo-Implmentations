@@ -17,7 +17,8 @@ Example of testing command:
             - FFNN
             - CNN
             - GoogLeNet
-            - ResNet (TODO)
+            - ResNet
+            - RNN (TODO)
     - Regressions
         - (TODO)
     - Reinforcement Learning
