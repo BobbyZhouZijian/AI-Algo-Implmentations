@@ -1,3 +1,15 @@
+'''
+Use RNN to do image classification.
+
+Basic idea: Treat each row/column of the image pixels as a sequence
+of inputs. Feed the inputs into a RNN and flatten the final weights
+into the shape of the number of classes we want to classify. Then
+backprop on the weight values.
+
+Proved pretty efficient on some simple iamge classification tasks e.g. MNIST.
+Accuracy for the code below: 98.6% with LSTM and 96.8% with RNN
+'''
+
 import argparse
 import os
 import time
