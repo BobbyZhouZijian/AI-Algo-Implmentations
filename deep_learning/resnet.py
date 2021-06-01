@@ -130,7 +130,7 @@ class ModelTrainer:
         num_epochs=10,
     ):
         '''
-        Train the CNN with the given torch dataset
+        Train the ResNet with the given torch dataset
 
         Parameter:
             a torch Dataset object
@@ -190,10 +190,7 @@ class ModelTrainer:
         images = images.to(self.device)
         self.model.eval()
         with torch.no_grad():
-            if self.aux_logits:
-                outputs, _, _ = self.model(images)
-            else:
-                outputs = self.model(images)
+            outputs = self.model(images)
             return outputs.cpu().data
     
     def test(self, data):
