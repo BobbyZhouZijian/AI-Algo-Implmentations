@@ -18,7 +18,7 @@ Example of testing command:
             - CNN
             - GoogLeNet
             - ResNet
-            - RNN (TODO)
+            - RNN (Finished ImageRNN)
     - Regressions
         - (TODO)
     - Reinforcement Learning
@@ -32,6 +32,7 @@ Example of testing command:
 - Unsupervised
     - Classic
         - kMeans
+        - Bayesian Optimization
         - Apriori (TODO)
     - Deep Learning
         - Adverserial (TODO)
