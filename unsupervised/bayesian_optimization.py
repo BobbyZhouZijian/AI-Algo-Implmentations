@@ -81,15 +81,16 @@ class BayesianOpitmizer:
         mu, std = self._surrogate(X_samples)
         mu = mu[:, 0]
 
+        a = mu - best
+        z = a / (std + 1e-9)
+
         if self.acq == 'poi':
             # add 1e-9 to std to avoid divison by 0
-            probs = norm.cdf((mu - best) / (std + 1e-9))
+            probs = norm.cdf(z)
         elif self.acq == 'ei':
-            a = mu - best
-            z = a / (std + 1e-9)
             probs = a * norm.cdf(z) + std * norm.pdf(z)
         elif self.acq == 'ucb':
-            probs = mu + self.kappa * std
+            probs = mu + (1.0 if self.is_max else -1.0) * self.kappa * std
         else:
             raise ValueError('acquisition not recognized')
         return probs
