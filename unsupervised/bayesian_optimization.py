@@ -8,8 +8,12 @@ and fit a gaussian process regressor on the samples (the surrogate function)
 
 Then, for each iteration, we generate a set of samples and ask the surrogate function
 to predict the mean and std of the samples, then
-we use an acquisition function (in this case Probability of Improvement) to
-produce a set of probabilities that each sample is the extrema we are looking for.
+we use an acquisition function to produce a set of probabilities that each sample is the extrema we are looking for.
+
+There are 3 most common choices of acquisitions:
+    1. Probability of Improvement (POI)
+    2. Expectation Improvement (EI)
+    3. Upper Confidence Bound (UCB) 
 
 Then we append the sample with the largest probability in the initial samples
 and continue the optimization process.
@@ -18,15 +22,16 @@ Reference: https://machinelearningmastery.com/what-is-bayesian-optimization/#:~:
 '''
 
 import argparse
+import warnings
 import math
 import numpy as np
-import scipy
+from scipy.stats import norm
 import matplotlib.pyplot as plt
 from sklearn.gaussian_process import GaussianProcessRegressor
 
 
 class BayesianOpitmizer:
-    def __init__(self, objective=None, rang=(0,1), is_max=True):
+    def __init__(self, objective=None, rang=(0,1), is_max=True, acq='ei', kappa=2.576):
         # model used to perform gaussian process
         self.model = GaussianProcessRegressor()
         # range to be optimised
@@ -34,6 +39,10 @@ class BayesianOpitmizer:
 
         # decide if we are looking for maxima or minima
         self.is_max = is_max
+
+        # use Expectation Improvement by default
+        # kappa will be ignored if mode is not ucb
+        self.acq = acq
 
         # the objective function to be approached
         if objective is None:
@@ -50,7 +59,9 @@ class BayesianOpitmizer:
         return objective
 
     def surrogate(self, X):
-        return self.model.predict(X, return_std=True)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            return self.model.predict(X, return_std=True)
     
     def plot(self, X, y, title='Plot'):
         plt.scatter(X, y, alpha=0.4)
@@ -70,7 +81,17 @@ class BayesianOpitmizer:
         mu, std = self.surrogate(X_samples)
         mu = mu[:, 0]
 
-        probs = scipy.stats.norm.cdf((mu - best) / (std + 1e-9))
+        if self.acq == 'poi':
+            # add 1e-9 to std to avoid divison by 0
+            probs = norm.cdf((mu - best) / (std + 1e-9))
+        elif self.acq == 'ei':
+            a = mu - best
+            z = a / (std + 1e-9)
+            probs = a * norm.cdf(z) + std * norm.pdf(z)
+        elif self.acq == 'ucb':
+            probs = mu + self.kappa * std
+        else:
+            raise ValueError('acquisition not recognized')
         return probs
     
     def generate_samples(self, num):
@@ -109,6 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('--objective', help='the objective function, \
         can be recovered to python function using eval()')
     parser.add_argument('--range', default='(0,1)', help='a tuple containing the left and right bound')
+    parser.add_argument('--acquisition', default='ei', help='choose from ei/poi/ucb')
     parser.add_argument('--min', action='store_true', help='whether we are looking for minima of the objective')
     parser.add_argument('--eval_mode', action='store_true', help='run this in evaluation mode')
     args = parser.parse_args()
@@ -116,13 +138,17 @@ if __name__ == '__main__':
     is_max = True
     if args.min:
         is_max = False
+    
+    acq = args.acquisition
+    if acq not in ['ei', 'poi', 'ucb']:
+        raise ValueError('Acquisition function not recognized')
 
     if args.eval_mode:
-        optimizer = BayesianOpitmizer(is_max=is_max)
+        optimizer = BayesianOpitmizer(is_max=is_max, acq=acq)
     else:
         fn = eval(args.objective)
         rang = eval(args.range)
-        optimizer = BayesianOpitmizer(fn, rang, is_max=is_max)
+        optimizer = BayesianOpitmizer(fn, rang, is_max=is_max, acq=acq)
     
     # get samples
     init_samples = int(args.init_samples)
