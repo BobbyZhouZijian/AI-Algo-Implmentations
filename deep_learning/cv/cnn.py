@@ -18,7 +18,7 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
 
-from activations.sigmoid import Sigmoid
+from .activations.sigmoid import Sigmoid
 
 __all__ = ['CNN']
 

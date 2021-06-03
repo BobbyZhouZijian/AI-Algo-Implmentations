@@ -14,11 +14,15 @@ Example of testing command:
             - kNN
             - NB
         - Deep learning models (implemented using PyTorch)
-            - FFNN
-            - CNN
-            - GoogLeNet
-            - ResNet
-            - RNN (Finished ImageRNN)
+            - Computer Vision
+                - FFNN
+                - CNN
+                - GoogLeNet (Inception)
+                - ResNet
+                - RNN (for image classifications)
+            - NLP
+                - RNN
+                - BERT (TODO)
     - Regressions
         - (TODO)
     - Reinforcement Learning

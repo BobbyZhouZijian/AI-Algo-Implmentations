@@ -9,7 +9,6 @@ In this implementation we use a 3 layer structure with PyTorch
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
-from torchvision import datasets
 from util import get_input_label_split, get_accuracy, get_precision
 import argparse
 import numpy as np
