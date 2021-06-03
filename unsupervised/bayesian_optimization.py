@@ -4,9 +4,9 @@ the chance of finding a global extrema efficiently as Bayesian
 probability helps utilising prior information.
 
 More specifically, we maintain a initial samples points
-and fit a gaussian process regressor on the samples (the surrogate function)
+and fit a gaussian process regressor on the samples (the _surrogate function)
 
-Then, for each iteration, we generate a set of samples and ask the surrogate function
+Then, for each iteration, we generate a set of samples and ask the _surrogate function
 to predict the mean and std of the samples, then
 we use an acquisition function to produce a set of probabilities that each sample is the extrema we are looking for.
 
@@ -58,7 +58,7 @@ class BayesianOpitmizer:
         print('using x**2 * math.sin(5 * math.pi * x) + noise as sample objective funciton.')
         return objective
 
-    def surrogate(self, X):
+    def _surrogate(self, X):
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
             return self.model.predict(X, return_std=True)
@@ -67,18 +67,18 @@ class BayesianOpitmizer:
         plt.scatter(X, y, alpha=0.4)
         step = (self.rang[1] - self.rang[0]) / 1000.0
         X_samples = np.asarray(np.arange(self.rang[0], self.rang[1], step)).reshape(-1, 1)
-        y_samples, _ = self.surrogate(X_samples)
+        y_samples, _ = self._surrogate(X_samples)
 
         plt.plot(X_samples, y_samples)
         plt.show()
 
     def _acquisition(self, X, X_samples):
-        y_hat, _ = self.surrogate(X)
+        y_hat, _ = self._surrogate(X)
         if self.is_max:
             best = max(y_hat)
         else:
             best = min(y_hat)
-        mu, std = self.surrogate(X_samples)
+        mu, std = self._surrogate(X_samples)
         mu = mu[:, 0]
 
         if self.acq == 'poi':
@@ -114,7 +114,7 @@ class BayesianOpitmizer:
 
             x = self.opt_acquisition(X)
             actual = self.objective(x)
-            est, _ = self.surrogate([[x]])
+            est, _ = self._surrogate([[x]])
             if (i+1) % 100 == 0:
                 print(f"epoch: {i+1}/{num_epochs}, x = {x}, f = {est}, actual = {actual}")
             
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     y = [optimizer.objective(x) for x in X]
     y_actual =[optimizer.objective(x, 0) for x in X]
 
-    print(f"Generated samples X and corresponding y")
+    print(f"Generated {init_samples} samples X and corresponding y")
 
     if is_max:
         best_idx_actual = np.argmax(y_actual)
