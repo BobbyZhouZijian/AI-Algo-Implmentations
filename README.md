@@ -9,7 +9,6 @@ Example of testing command:
             - SVM
             - LR
             - Boosting
-            - DT
             - GBDT
             - kNN
             - NB
@@ -36,6 +35,7 @@ Example of testing command:
 - Unsupervised
     - Classic
         - kMeans
+        - Gaussian Process Regressor
         - Bayesian Optimization
         - Apriori (TODO)
     - Deep Learning
