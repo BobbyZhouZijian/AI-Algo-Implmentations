@@ -4,6 +4,7 @@ from util import get_input_label_split, get_accuracy, get_precision, sigmoid
 import argparse
 import math
 
+
 class LogisticRegression:
     def __init__(self, lr=1e-5, num_epochs=100):
         self.lr = lr
@@ -14,17 +15,17 @@ class LogisticRegression:
 
         # for reproduction
         np.random.seed(seed=2021)
-    
+
     def train(self, data, label_name):
         self.train_x, self.train_y = get_input_label_split(data, label_name)
         data_size = self.train_x.shape[0]
         weight_size = self.train_x.shape[1] + 1
-        
+
         # initialize weights using Xavier initialization
-        self.weights = np.random.randn(weight_size, 1) * math.sqrt(1.0/weight_size)
-        bias = np.ones((data_size,1))
+        self.weights = np.random.randn(weight_size, 1) * math.sqrt(1.0 / weight_size)
+        bias = np.ones((data_size, 1))
         train_x = np.mat(np.hstack((self.train_x, bias)))
-        train_y = self.train_y.reshape((data_size,1))
+        train_y = self.train_y.reshape((data_size, 1))
 
         # train for num_epochs epochs
         for i in range(self.num_epochs):
@@ -32,7 +33,7 @@ class LogisticRegression:
             o = sigmoid(a)
             diff = (train_y - o)
             self.weights = self.weights + self.lr * train_x.T * diff
-    
+
     def infer(self, test_data, thres=0.5):
         data_size = test_data.shape[0]
         bias = np.ones((data_size, 1))
@@ -41,6 +42,7 @@ class LogisticRegression:
         o = sigmoid(a)
         o = o > thres
         return o
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -65,4 +67,3 @@ if __name__ == '__main__':
 
     else:
         pass
-    

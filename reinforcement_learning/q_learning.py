@@ -1,4 +1,4 @@
-'''
+"""
 Q Learning is based on the Bellman Update Function:
     U(S) = R(S) + gamma * max of E[U(S')]
 
@@ -9,14 +9,23 @@ Q(S,A) = (1-alpha) * Q(S,A) + alpha * (reward + gamma * max Q(S', A'))
 
 Also, to prevent the agent from stuck in a local maxima, we use the hyper-parameter
 epsilon to encourage the agent to explore unseen area.
-'''
+"""
 
-from collections import defaultdict
 from time import sleep
 import numpy as np
 import gym
 import random
 import math
+
+
+def print_frames(frames):
+    for i, frame in enumerate(frames):
+        print(frame['frame'])
+        print(f'Timestamp: {i + 1}')
+        print(f"State: {frame['state']}")
+        print(f"Action: {frame['action']}")
+        print(f"Reward: {frame['reward']}")
+        sleep(0.1)
 
 
 class Q_Learn:
@@ -29,36 +38,31 @@ class Q_Learn:
         self.env = env
         self.q_table = np.zeros((env.observation_space.n, env.action_space.n))
         self.steps = 0
-        
+
         # for approximate Q Learning
         self.features = {}
         self.weights = {}
 
-
     def reset_steps(self):
         self.steps = 0
 
-    
     def epsilon_decay(self):
         return self.epsilon_low + (self.epsilon_high - self.epsilon_low) * math.exp(-self.steps / self.decay)
 
-
     def get_features(self, state, action):
-       # just an example
-       self.features['north'] = 1.0
-       self.features['south'] = 1.0
-       self.features['west'] = 1.0
-       self.features['east'] = 1.0
-    
+        # just an example
+        self.features['north'] = 1.0
+        self.features['south'] = 1.0
+        self.features['west'] = 1.0
+        self.features['east'] = 1.0
 
     def get_q_value(self):
         res = 0
         for f in self.features:
             if f not in self.weights:
                 self.weights[f] = 1.0
-            res += self.features[f] * self.weights[f] 
+            res += self.features[f] * self.weights[f]
         return res
-    
 
     def get_q_values(self, state):
         actions = self.env.action_space.n
@@ -69,14 +73,13 @@ class Q_Learn:
             res[a] = self.get_q_value()
         return res
 
-    
     def approx_train(self, episodes=10000):
-        '''
+        """
         Training an approximate Q_learning algorithm.
-        This approach approximates the Q value by a set of faetures
+        This approach approximates the Q value by a set of features
         multiplied by their weights. In another word Q = sum of (wi * fi)
         This way we do not really need to update the exact Q values.
-        '''
+        """
         env = self.env
         self.reset_steps()
 
@@ -105,25 +108,23 @@ class Q_Learn:
 
                 self.steps += 1
                 next_state, reward, done, info = env.step(action)
-                
+
                 for f in self.features:
                     self.weights[f] = self.weights[f] + self.alpha * (reward + self.gamma * diff[action])
-                
+
                 if reward == -10:
                     penalties += 1
-                
+
                 state = next_state
                 epochs += 1
 
-            if i % (episodes//10) == 0:
+            if i % (episodes // 10) == 0:
                 print(f'episode: {i}, epochs elapsed: {epochs}, penalties incurred: {penalties}')
                 print(f'weights: {self.weights}')
 
-
-
     def train(self, episodes=10000):
         env = self.env
-        self.reset_t()
+        self.reset_steps()
 
         for i in range(episodes):
             state = env.reset()
@@ -141,32 +142,20 @@ class Q_Learn:
                 self.steps += 1
                 next_state, reward, done, info = env.step(action)
 
-
                 old_value = self.q_table[state, action]
                 next_max = np.max(self.q_table[next_state])
 
-                new_value = (1 - alpha) * old_value + self.alpha * (reward + self.gamma * next_max)
+                new_value = (1 - self.alpha) * old_value + self.alpha * (reward + self.gamma * next_max)
                 self.q_table[state, action] = new_value
 
                 if reward == -10:
                     penalties += 1
-                
+
                 state = next_state
                 epochs += 1
 
-            if i % (episodes//10) == 0:
+            if i % (episodes // 10) == 0:
                 print(f'episode: {i}, epochs elapsed: {epochs}, penalties incurred: {penalties}')
-
-
-    def print_frames(self, frames):
-        for i, frame in enumerate(frames):
-            print(frame['frame'])
-            print(f'Timestamp: {i+1}')
-            print(f"State: {frame['state']}")
-            print(f"Action: {frame['action']}")
-            print(f"Reward: {frame['reward']}")
-            sleep(0.1)
-
 
     def act(self, approx=False):
         env = self.env
@@ -182,10 +171,10 @@ class Q_Learn:
             else:
                 action = np.argmax(self.get_q_values(state))
             state, reward, done, info = env.step(action)
-            
+
             if reward == -10:
                 penalties += 1
-            
+
             # for animation
             frames.append({
                 'frame': env.render(mode='ansi'),
@@ -195,9 +184,9 @@ class Q_Learn:
             })
 
             epochs += 1
-        
+
         print(f'epochs elapsed: {epochs}, penalties incurred: {penalties}')
-        self.print_frames(frames)
+        print_frames(frames)
 
 
 if __name__ == '__main__':

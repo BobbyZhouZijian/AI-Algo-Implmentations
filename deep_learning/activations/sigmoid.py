@@ -1,4 +1,4 @@
-'''Implement the standard and hard sigmoid functions'''
+"""Implement the standard and hard sigmoid functions"""
 
 import torch.nn as nn
 import torch.nn.functional as F

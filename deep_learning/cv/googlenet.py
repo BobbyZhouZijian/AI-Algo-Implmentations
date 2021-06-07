@@ -1,13 +1,13 @@
-'''
+"""
 GoogLeNet was invented by Google used for image
 classification.
 
 It is well-known for its usage of Inception, a block
-of convolutional layers which enables the network to be 
+of convolutional layers which enables the network to be
 much deeper than vanilla CNN, hence achieving higher performance.
 
 The code below is referenced from https://github.com/pytorch/vision/blob/master/torchvision/models/googlenet.py
-'''
+"""
 
 import os
 import argparse
@@ -20,18 +20,17 @@ import torch.nn as nn
 import torch.nn.functional as F
 import scipy.stats as stats
 
-
 __all__ = ['GoogleNet']
 
 
 class BasicConv2d(nn.Module):
-    '''a basic convolutional block'''
+    """a basic convolutional block"""
 
     def __init__(self, in_channels, out_channels, **kwargs):
         super(BasicConv2d, self).__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, bias=False, **kwargs)
         self.batch_norm = nn.BatchNorm2d(out_channels, eps=0.001)
-    
+
     def forward(self, x):
         out = self.conv(x)
         out = self.batch_norm(out)
@@ -39,18 +38,18 @@ class BasicConv2d(nn.Module):
 
 
 class Inception(nn.Module):
-    '''Build the Inception Block'''
+    """Build the Inception Block"""
 
     def __init__(
-        self,
-        in_channels,
-        ch1_1,
-        ch3_3red,
-        ch3_3,
-        ch5_5red,
-        ch5_5,
-        pool_proj,
-        conv_block=None
+            self,
+            in_channels,
+            ch1_1,
+            ch3_3red,
+            ch3_3,
+            ch5_5red,
+            ch5_5,
+            pool_proj,
+            conv_block=None
     ):
         super(Inception, self).__init__()
         if conv_block is None:
@@ -71,13 +70,13 @@ class Inception(nn.Module):
             nn.MaxPool2d(kernel_size=3, stride=1, padding=1, ceil_mode=True),
             conv_block(in_channels, pool_proj, kernel_size=1)
         )
-    
+
     def forward(self, x):
         branch1 = self.branch1(x)
         branch2 = self.branch2(x)
         branch3 = self.branch3(x)
         branch4 = self.branch4(x)
-    
+
         return torch.cat([branch1, branch2, branch3, branch4], 1)
 
 
@@ -86,13 +85,13 @@ class InceptionAux(nn.Module):
         super(InceptionAux, self).__init__()
         if conv_block is None:
             conv_block = BasicConv2d
-        
+
         self.conv = conv_block(in_channels, 128, kernel_size=1)
         self.fc1 = nn.Linear(2048, 1024)
         self.fc2 = nn.Linear(1024, num_classes)
 
     def forward(self, x):
-        out = F.adaptive_avg_pool2d(x, (4,4))
+        out = F.adaptive_avg_pool2d(x, (4, 4))
         # size: in_channels * 4 * 4
         out = self.conv(out)
         # size: 128 * 4 * 4
@@ -105,14 +104,13 @@ class InceptionAux(nn.Module):
         out = self.fc2(out)
         return out
 
-    
 
 class GoogLeNet(nn.Module):
     def __init__(
-        self,
-        num_classes,
-        in_channels=3,
-        aux_logits=False,
+            self,
+            num_classes,
+            in_channels=3,
+            aux_logits=False,
     ):
         super(GoogLeNet, self).__init__()
         blocks = [BasicConv2d, Inception, InceptionAux]
@@ -143,20 +141,19 @@ class GoogLeNet(nn.Module):
         self.inception5a = inception_block(832, 256, 160, 320, 32, 128, 128)
         self.inception5b = inception_block(832, 384, 192, 384, 48, 128, 128)
 
-
         if aux_logits:
             self.aux1 = inception_aux_block(512, num_classes)
             self.aux2 = inception_aux_block(528, num_classes)
         else:
             self.aux1 = None
             self.aux2 = None
-        
+
         self.avgppol = nn.AdaptiveAvgPool2d((1, 1))
         self.dropout = nn.Dropout(0.2)
         self.fc = nn.Linear(1024, num_classes)
-    
+
         self._initialize_weights()
-    
+
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
@@ -168,7 +165,7 @@ class GoogLeNet(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
-    
+
     def _forward(self, x):
         # 3 * 224 * 224
         x = self.conv1(x)
@@ -193,7 +190,7 @@ class GoogLeNet(nn.Module):
         aux1 = None
         if self.aux1 is not None and self.training:
             aux1 = self.aux1(x)
-        
+
         x = self.inception4b(x)
         # 512 * 14 * 14
         x = self.inception4c(x)
@@ -222,7 +219,6 @@ class GoogLeNet(nn.Module):
         x = self.fc(x)
 
         return x, aux2, aux1
-    
 
     def forward(self, x):
         x, aux1, aux2 = self._forward(x)
@@ -240,20 +236,19 @@ class ModelTrainer:
         self.aux_logits = aux_logits,
         self.model = None
         self.device = device
-    
+
     def train(
-        self,
-        dataset,
-        num_classes,
-        num_epochs=15,
+            self,
+            dataset,
+            num_classes,
+            num_epochs=15,
     ):
-        '''
+        """
         Train the CNN with the given torch dataset
 
         Parameter:
             a torch Dataset object
-        '''
-
+        """
 
         # build model
         self.model = GoogLeNet(
@@ -286,8 +281,8 @@ class ModelTrainer:
                 if self.aux_logits:
                     outputs, aux1, aux2 = self.model(images)
                     loss = criterion(outputs, labels) \
-                        + 0.3 * criterion(aux1, labels) \
-                            + 0.3 * criterion(aux2, labels)
+                           + 0.3 * criterion(aux1, labels) \
+                           + 0.3 * criterion(aux2, labels)
                 else:
                     outputs = self.model(images)
                     loss = criterion(outputs, labels)
@@ -295,22 +290,22 @@ class ModelTrainer:
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            
-                if (i+1) % 100 == 0:
-                    print(f"Epoch: {t+1}/{num_epochs}, Step: {i+1}/{num_steps}, Loss: {loss.item()}")
+
+                if (i + 1) % 100 == 0:
+                    print(f"Epoch: {t + 1}/{num_epochs}, Step: {i + 1}/{num_steps}, Loss: {loss.item()}")
             end = time.time()
-            print(f'Time elapsed for Epoch [{t+1}/{num_epochs}]: {end - start}s')
-    
+            print(f'Time elapsed for Epoch [{t + 1}/{num_epochs}]: {end - start}s')
+
     def infer(self, images):
-        '''
+        """
         infer the given image set
 
         Parameter:
             a torch Dataset object for inference
-        
+
         output:
             a list consisting of the predicted classes
-        '''
+        """
         images = images.to(self.device)
         self.model.eval()
         with torch.no_grad():
@@ -319,7 +314,7 @@ class ModelTrainer:
             else:
                 outputs = self.model(images)
             return outputs.cpu().data
-    
+
     def test(self, data):
         data_loader = torch.utils.data.DataLoader(
             dataset=data,
@@ -339,7 +334,7 @@ class ModelTrainer:
                 _, predicted = torch.max(outputs.data, 1)
                 total_num += len(labels)
                 num_hit += (predicted == labels).sum().item()
-        
+
         return num_hit / total_num
 
 
@@ -350,11 +345,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     download = True
-    if os.path.exists(args.file_path+'/cifar-10-batches-py/'):
+    if os.path.exists(args.file_path + '/cifar-10-batches-py/'):
         download = False
-    
+
     transform = transforms.Compose([
-        transforms.Resize((224,224)),
+        transforms.Resize((224, 224)),
         transforms.ToTensor()
     ])
 
@@ -380,5 +375,3 @@ if __name__ == '__main__':
         print(f"accuracy score: {acc_score}")
     else:
         pass
-            
-

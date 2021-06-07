@@ -1,15 +1,15 @@
-'''
+"""
 Convolutional Neural Network is a network designed for image
 classification. In this task, we build a simple CNN to learn
 on MNIST dataset.
 
 A classic CNN is typically comprised of several layers. Each layer is
-formed by a stack of a convolutional layer, a batch normalizaation,
-an acivation and pooling lyaer.
+formed by a stack of a convolutional layer, a batch normalization,
+an activation and pooling layer.
 
 After the convolutional layers, in order to get a classification score,
 we pass the last conv layer to a few fully connected layers.
-'''
+"""
 
 import os
 import argparse

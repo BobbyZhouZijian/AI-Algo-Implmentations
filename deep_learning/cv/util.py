@@ -1,13 +1,15 @@
 import numpy as np
 
+
 def get_input_label_split(train_data, label_name=None):
     if label_name == None:
-        train = train_data.iloc[:,:].to_numpy()
+        train = train_data.iloc[:, :].to_numpy()
         return train
     y = train_data[label_name].to_numpy()
     train = train_data.drop(columns=[label_name])
-    train = train.iloc[:,:].to_numpy()
+    train = train.iloc[:, :].to_numpy()
     return train, y
+
 
 def get_accuracy(pred, y, thres=0.5):
     if len(pred) != len(y):
@@ -21,8 +23,9 @@ def get_accuracy(pred, y, thres=0.5):
         cur_pred = 1 if pred[i] > thres else 0
         if cur_pred == y[i]:
             acc_cnt += 1
-    
+
     return acc_cnt / total
+
 
 def get_precision(pred, y, thres=0.5):
     if len(pred) != len(y):
@@ -39,8 +42,9 @@ def get_precision(pred, y, thres=0.5):
         cur_pred = 1 if pred[i] > thres else 0
         if cur_pred == y[i]:
             acc_cnt += 1
-    
+
     return acc_cnt / total
+
 
 def sigmoid(x):
     return 1.0 / (1.0 + np.exp(-x))

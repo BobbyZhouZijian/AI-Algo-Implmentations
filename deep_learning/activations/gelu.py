@@ -1,4 +1,4 @@
-'''A custom implementation of the Gaussian Error Linear Unit'''
+"""A custom implementation of the Gaussian Error Linear Unit"""
 
 import math
 import torch

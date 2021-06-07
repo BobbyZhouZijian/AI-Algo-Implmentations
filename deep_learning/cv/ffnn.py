@@ -1,10 +1,10 @@
-'''
+"""
 Feed Forward Neural Network is a basic form of a deep neural network.
 It comprises of a few layers that pass down in a feed forward manner to
 the output layer.
 
 In this implementation we use a 3 layer structure with PyTorch
-'''
+"""
 
 import torch
 import torch.nn as nn
@@ -16,10 +16,11 @@ import pandas as pd
 
 __all__ = ['FFNN']
 
+
 class HeartTrainDataset(Dataset):
     def __init__(self, data, label_name):
         self.X, self.y = get_input_label_split(data, label_name)
-    
+
     def __getitem__(self, index):
         features = self.X[index]
         feat_tensor = torch.tensor(features, dtype=torch.float32)
@@ -29,18 +30,19 @@ class HeartTrainDataset(Dataset):
         label_tensor = torch.tensor(label, dtype=torch.float32)
 
         return feat_tensor, label_tensor
-    
+
     def __len__(self):
         return len(self.X)
+
 
 class HeartTestDataset(Dataset):
     def __init__(self, data):
         self.X = data
-    
+
     def __getitem__(self, index):
         features = self.X[index]
         return torch.tensor(features, dtype=torch.float32)
-    
+
     def __len__(self):
         return len(self.X)
 
@@ -53,7 +55,7 @@ class NeuralNet(nn.Module):
         self.fc3 = nn.Linear(hidden_size2, num_classes)
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
-    
+
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
@@ -62,7 +64,7 @@ class NeuralNet(nn.Module):
         out = self.fc3(out)
         out = self.sigmoid(out)
         return out
-        
+
 
 class FFNN:
     def __init__(self, device='cpu'):
@@ -70,7 +72,7 @@ class FFNN:
         self.train_y = None
         self.model = None
         self.device = device
-    
+
     def train(self, data, label_name, lr=7e-4, num_epochs=5):
 
         dataset = HeartTrainDataset(data, label_name)
@@ -104,7 +106,6 @@ class FFNN:
 
                 if (i + 1) % 4 == 0:
                     print(f"Epoch {t}: {i}/{num_steps} steps have elasped. Current loss {loss.item()}")
-    
 
     def infer(self, data):
         test_x = HeartTestDataset(data)

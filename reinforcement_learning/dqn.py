@@ -6,13 +6,14 @@ import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
 
+
 class NeuralNet(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super().__init__()
         self.fc1 = nn.Linear(input_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, output_size)
         self.relu = nn.ReLU()
-    
+
     def forward(self, x):
         out = self.fc1(x)
         out = self.relu(out)
@@ -33,7 +34,7 @@ class Agent:
     def train(self):
         if (len(self.replay)) < self.batch_size:
             return
-        
+
         samples = random.sample(self.replay, self.batch_size)
         state, action, reward, next_state = zip(*samples)
 
@@ -51,23 +52,23 @@ class Agent:
         self.toptimizer.step()
 
     def epsilon_decay(self):
-        return self.epsilon_low + (self.epsilon_high - self.epsilon_low) * (math.exp(-self.steps/self.decay))
-    
+        return self.epsilon_low + (self.epsilon_high - self.epsilon_low) * (math.exp(-self.steps / self.decay))
+
     def act(self, cur_state):
         self.steps += 1
         epsilon = self.epsilon_decay()
-        if random.uniform(0,1) < epsilon:
+        if random.uniform(0, 1) < epsilon:
             action = random.randrange(self.action_space)
         else:
-            state = torch.tensor(cur_state, dtype=torch.float).view(1,-1)
+            state = torch.tensor(cur_state, dtype=torch.float).view(1, -1)
             action = torch.argmax(self.net(state)).item()
         return action
-    
+
     def add_to_replay(self, state, action, reward, next_state):
-        self.replay.append((state,action,reward,next_state))
+        self.replay.append((state, action, reward, next_state))
         while len(self.replay) == self.capacity:
             self.replay.pop(0)
-    
+
 
 class DQN:
     def __init__(self):
@@ -76,12 +77,12 @@ class DQN:
             'gamma': 0.8,
             'epsilon_high': 0.9,
             'epsilon_low': 0.05,
-            'decay': 200, 
+            'decay': 200,
             'lr': 0.001,
             'capacity': 10000,
             'batch_size': 64,
             'state_space': self.env.observation_space.shape[0],
-            'action_space': self.env.action_space.n   
+            'action_space': self.env.action_space.n
         }
         self.agent = Agent(params)
         self.score = []
@@ -107,10 +108,10 @@ class DQN:
                 self.agent.train()
 
                 self.score.append(total_reward)
-                self.mean.append( sum(self.score[-100:])/100)
-    
+                self.mean.append(sum(self.score[-100:]) / 100)
+
     def plot_result(self):
-        plt.figure(figsize=(20,10))
+        plt.figure(figsize=(20, 10))
         plt.clf()
 
         score = self.score
@@ -121,13 +122,12 @@ class DQN:
         plt.ylabel('Duration')
         plt.plot(score)
         plt.plot(mean)
-        plt.text(len(score)-1, score[-1], str(score[-1]))
-        plt.text(len(mean)-1, mean[-1], str(mean[-1]))
-    
+        plt.text(len(score) - 1, score[-1], str(score[-1]))
+        plt.text(len(mean) - 1, mean[-1], str(mean[-1]))
+
     def print_result(self):
         print(f'score of the training is {self.score}')
         print(f'mean of the training is {self.mean}')
-
 
 
 if __name__ == '__main__':

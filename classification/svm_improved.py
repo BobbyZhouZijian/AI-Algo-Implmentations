@@ -1,4 +1,4 @@
-'''
+"""
 The basic version of SVM uses gradietn ascent
 to find the local maxima of the loss function:
 
@@ -14,7 +14,7 @@ version of SVM.
 SMO optimize the following Loss which is equivalent to the one above:
 
 L = sum alpha - 0.5 * sum sum alphai * alphaj * yi * yj * xiT * xj
-'''
+"""
 
 
 import random

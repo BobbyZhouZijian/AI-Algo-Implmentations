@@ -1,8 +1,8 @@
-'''
+"""
 Implements the Log Softmax Activation.
 
 Implementation details follow that of PyTorch.
-'''
+"""
 
 import torch
 import torch.nn as nn

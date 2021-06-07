@@ -1,4 +1,4 @@
-'''
+"""
 Naive Bayesian Classifier builds on the assumption that among
 the different features of a sample data point x, each feature xi
 are independent of each other. In another word,
@@ -7,7 +7,7 @@ P(x | t) = P(x1 | t) * P(x2 | t) * ... * P(xn | t)
 Hence we can easily compute P(t | d) = P(d | t) * P(t) / P(d) = πP(xi | t) * P(t) / P(d)
 
 Hence expected t = argmax P(t | d) = πP(xi | t) * P(t)
-'''
+"""
 
 import math
 import numpy as np
@@ -24,7 +24,6 @@ class NBC:
         self.prob = {}
         self.is_discrete = set()
 
-
     def train(self, data, label_name):
         self.train_data = data
         self.label = label_name
@@ -40,12 +39,11 @@ class NBC:
         for col in columns:
             if col == label_name:
                 continue
-            
+
             discretized_col = discretize(self.train_data[col])
             if discretized_col is not None:
                 self.is_discrete.add(col)
                 self.train_data[col] = discretized_col
-
 
     def infer(self, test_data):
         size = test_data.shape[0]
@@ -63,7 +61,7 @@ class NBC:
                 temp_size = len(temp)
                 for col in columns:
                     cur_col = temp[col].to_numpy()
-                    
+
                     test_val = test_data[col].iloc[i]
                     if col in self.is_discrete:
                         vals = np.unique(cur_col)
@@ -89,7 +87,7 @@ class NBC:
                     best_y = y
                     best_prob = prob
             pred[i] = best_y
-        
+
         return pred
 
 
@@ -117,4 +115,3 @@ if __name__ == '__main__':
 
     else:
         pass
-    

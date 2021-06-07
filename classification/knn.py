@@ -12,26 +12,25 @@ class kNN:
         self.index = None
         self.train_x = None
         self.train_y = None
-    
+
     def train(self, data, label_name):
         self.train_x, self.train_y = get_input_label_split(data, label_name)
         self.index = faiss.IndexFlatL2(self.train_x.shape[1])
         self.index.add(np.ascontiguousarray(self.train_x.astype('float32')))
 
         self.k = math.floor(math.sqrt(len(self.train_x)))
-    
+
     def slow_infer(self, test_data):
         pred = []
         for d in test_data:
-            dist = np.array([[np.linalg.norm(d - t),label]  for t,label in zip(self.train_x, self.train_y)])
-            dist = dist[dist[:,0].argsort()]
+            dist = np.array([[np.linalg.norm(d - t), label] for t, label in zip(self.train_x, self.train_y)])
+            dist = dist[dist[:, 0].argsort()]
             labels = np.array([d[1] for d in dist[:self.k]]).astype('int')
             l = np.argmax(np.bincount(labels))
             pred.append(l)
 
         return pred
 
-    
     def infer(self, test_data):
         distances, indices = self.index.search(np.ascontiguousarray(test_data.astype('float32')), k=self.k)
         votes = self.train_y[indices]
@@ -63,4 +62,3 @@ if __name__ == '__main__':
 
     else:
         pass
-    

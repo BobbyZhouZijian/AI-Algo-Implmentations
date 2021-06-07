@@ -1,11 +1,10 @@
-'''
+"""
 Implementation of ResNet based on the paper:
     https://arxiv.org/pdf/1512.03385.pdf
 
 Reference:
     https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
-'''
-
+"""
 
 import os
 import time
@@ -29,12 +28,12 @@ def conv3x3(in_channels, out_channels, stride=1):
 
 class ResidualBlock(nn.Module):
     def __init__(
-        self,
-        in_channels,
-        out_channels,
-        stride=1,
-        downsample=None,
-        norm_layer=None
+            self,
+            in_channels,
+            out_channels,
+            stride=1,
+            downsample=None,
+            norm_layer=None
     ):
         super(ResidualBlock, self).__init__()
         if norm_layer is None:
@@ -45,7 +44,7 @@ class ResidualBlock(nn.Module):
         self.conv2 = conv3x3(out_channels, out_channels)
         self.bn2 = norm_layer(out_channels)
         self.downsample = downsample
-    
+
     def forward(self, x):
         identity = x
         x = self.conv1(x)
@@ -59,18 +58,18 @@ class ResidualBlock(nn.Module):
             identity = self.downsample(identity)
 
         x += identity
-        out = self.relu(x) 
+        out = self.relu(x)
 
         return out
 
 
 class ResNet(nn.Module):
     def __init__(
-        self,
-        block,
-        layers,
-        num_classes=10,
-        norm_layer=None
+            self,
+            block,
+            layers,
+            num_classes=10,
+            norm_layer=None
     ):
         super(ResNet, self).__init__()
         if norm_layer is None:
@@ -84,9 +83,8 @@ class ResNet(nn.Module):
         self.layer1 = self.make_layer(block, 16, layers[0])
         self.layer2 = self.make_layer(block, 32, layers[1], 2)
         self.layer3 = self.make_layer(block, 64, layers[2], 2)
-        self.avg_pool = nn.AdaptiveAvgPool2d((1,1))
+        self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(64, num_classes)
-    
 
     def make_layer(self, block, out_channels, blocks, stride=1):
         norm_layer = self.norm_layer
@@ -96,13 +94,12 @@ class ResNet(nn.Module):
                 conv3x3(self.in_channels, out_channels, stride=stride),
                 nn.BatchNorm2d(out_channels)
             )
-        layers = []
-        layers.append(block(self.in_channels, out_channels, stride, downsample, norm_layer=norm_layer))
+        layers = [block(self.in_channels, out_channels, stride, downsample, norm_layer=norm_layer)]
         self.in_channels = out_channels
 
         for _ in range(1, blocks):
             layers.append(block(out_channels, out_channels, norm_layer=norm_layer))
-        
+
         return nn.Sequential(*layers)
 
     def forward(self, x):
@@ -122,12 +119,12 @@ class ModelTrainer:
     def __init__(self, device='cuda'):
         self.model = None
         self.device = device
-    
+
     def train(
-        self,
-        dataset,
-        num_classes,
-        num_epochs=10,
+            self,
+            dataset,
+            num_classes,
+            num_epochs=10,
     ):
         '''
         Train the ResNet with the given torch dataset
@@ -136,11 +133,10 @@ class ModelTrainer:
             a torch Dataset object
         '''
 
-
         # build model
         self.model = ResNet(
             ResidualBlock,
-            [2,2,2],
+            [2, 2, 2],
             num_classes,
         ).to(device=self.device)
 
@@ -171,28 +167,28 @@ class ModelTrainer:
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-            
-                if (i+1) % 100 == 0:
-                    print(f"Epoch: {t+1}/{num_epochs}, Step: {i+1}/{num_steps}, Loss: {loss.item()}")
+
+                if (i + 1) % 100 == 0:
+                    print(f"Epoch: {t + 1}/{num_epochs}, Step: {i + 1}/{num_steps}, Loss: {loss.item()}")
             end = time.time()
-            print(f'Time elapsed for Epoch [{t+1}/{num_epochs}]: {end - start}s')
-    
+            print(f'Time elapsed for Epoch [{t + 1}/{num_epochs}]: {end - start}s')
+
     def infer(self, images):
-        '''
+        """
         infer the given image set
 
         Parameter:
             a torch Dataset object for inference
-        
+
         output:
             a list consisting of the predicted classes
-        '''
+        """
         images = images.to(self.device)
         self.model.eval()
         with torch.no_grad():
             outputs = self.model(images)
             return outputs.cpu().data
-    
+
     def test(self, data):
         data_loader = torch.utils.data.DataLoader(
             dataset=data,
@@ -212,7 +208,7 @@ class ModelTrainer:
                 _, predicted = torch.max(outputs.data, 1)
                 total_num += len(labels)
                 num_hit += (predicted == labels).sum().item()
-        
+
         return num_hit / total_num
 
 
@@ -223,11 +219,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     download = True
-    if os.path.exists(args.file_path+'/cifar-10-batches-py/'):
+    if os.path.exists(args.file_path + '/cifar-10-batches-py/'):
         download = False
-    
+
     transform = transforms.Compose([
-        transforms.Resize((224,224)),
+        transforms.Resize((224, 224)),
         transforms.ToTensor()
     ])
 

@@ -1,4 +1,4 @@
-'''
+"""
 SVM builds on the idea of maximising the width
 of the street between the positive sets of points 
 and the negative sets of points.
@@ -8,7 +8,7 @@ This maximisation can be achieved by minimising the following loss function:
 L = 1/2 ||w||^2 + C / N * sum (max(0, 1 - yi(w * xi + b)))
 
 To minimise this L, we only need to adjust the value of dot(xi, xj)
-'''
+"""
 
 import numpy as np
 import pandas as pd

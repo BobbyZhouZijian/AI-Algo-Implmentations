@@ -1,31 +1,31 @@
-'''
+"""
 Gaussian Process Regressor builds on the property
 that the conditional probability distribution of a
-subset of multivariate normal is still a multibariate normal
+subset of multivariate normal is still a multivariate normal
 distribution.
 
 As the population mean of any distribution approaches a normal
 distribution, when we make observations about a distribution, we
 can assume each point follows a normal distribution. Hence, if we
-make n observations in toatl, we can treat this n-observation as a
+make n observations in total, we can treat this n-observation as a
 vector of n elements following a n-dim multivariate normal distribution.
 
 If we want information on points that are not been observed yet,
-we can add the observed points and the unobserved points to form a 
+we can add the observed points and the unobserved points to form a
 larger dimension multivariate normal distribution.
 
 A multivariate normal distribution contains two parameters, the mean vector
 which we typically assume to be 0 as a prior, and the covariance matrix, which
 we calculate using a kernel function i.e. cov(xi, xj) = k(xi, xj).
 
-By amalgamating the observed and the unobserved, we can derive the 
-distribution of the unoserved points: the conditional distribution of 
+By amalgamating the observed and the unobserved, we can derive the
+distribution of the unobserved points: the conditional distribution of
 the multivariate normal given that the observed points.
 
 To improve the performance of the algorithm, we can do a preprocessing
 to find a good value for the hyperparameters of the kernel function by minimizing
 the negative loglikelihood loss.
-'''
+"""
 
 import numpy as np
 from scipy.spatial.distance import cdist

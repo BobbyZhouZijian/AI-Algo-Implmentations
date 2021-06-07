@@ -1,8 +1,8 @@
-'''
+"""
 Adaboost builds on the idea that a series of weak classifiers
 can be aggregated and form a strong classifier.
 
-More specifically, let each weak classifier be H_k, 
+More specifically, let each weak classifier be H_k,
 let the weightage assigned to each weak classifier be alpha_k,
 then the strong classifier is just H = sum of (H_k * alpha_k)
 
@@ -15,7 +15,7 @@ The formula for the kth weak classifier:
 
     updated weight = weight * exp{-yi * alpha_k * H_k(x)} / Z
     where Z is a normalizer: Z = sum of (updated weight)
-'''
+"""
 
 import math
 import numpy as np
@@ -33,11 +33,9 @@ class Adaboost:
         self.train_y = None
         self.trees = []
         self.alphas = []
-    
 
     def create_tree(self, random_state=2021):
         return DecisionTreeClassifier(max_depth=self.max_depth, random_state=random_state)
-    
 
     def calc_ek(self, weights, diff, method='linear'):
         # maxm of the difference
@@ -51,7 +49,6 @@ class Adaboost:
             return 1. - np.exp(-abs_diff / E)
         raise Exception('method is not in {linear, square, exp}')
 
-    
     def train(self, data, label_name, loss='linear'):
         self.train_x, self.train_y = get_input_label_split(data, label_name)
 
@@ -73,7 +70,6 @@ class Adaboost:
             weights = temp / sum(temp)
             self.alphas[i] = alpha
 
-    
     def infer(self, test_data):
         size = test_data.shape[0]
         pred = np.zeros(size)
@@ -107,4 +103,3 @@ if __name__ == '__main__':
 
     else:
         pass
-    

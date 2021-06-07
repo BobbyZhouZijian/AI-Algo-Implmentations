@@ -18,9 +18,10 @@ import argparse
 from sklearn.tree import DecisionTreeRegressor
 from util import get_input_label_split, get_accuracy, get_precision, sigmoid
 
+
 class GBDT:
     def __init__(self, n_estimators=300, max_depth=5, lr=0.1):
-        self.estimator_list = [] 
+        self.estimator_list = []
         self.n_estimators = n_estimators
         self.max_depth = max_depth
         self.lr = lr
@@ -45,7 +46,7 @@ class GBDT:
                 self.F = train_preds
             else:
                 self.F += self.lr * train_preds
-    
+
     def infer(self, data, thres=0.5):
         size = data.shape[0]
         pred = np.zeros(size, dtype=float)
@@ -57,6 +58,7 @@ class GBDT:
         # broadcasting
         pred = pred > thres
         return pred
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
