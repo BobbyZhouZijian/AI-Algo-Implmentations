@@ -126,13 +126,16 @@ def get_style_model_and_losses(cnn, mean, std, style_img, content_img, content_l
 
 
 def get_input_optimizer(img):
+    # specify optimizer to only optimize for the img parameters
     optimizer = optim.LBFGS([img.requires_grad_()])
     return optimizer
 
 
-def run(cnn, mean, std, content_img, style_img, input_img, num_steps=300, style_weight=1, content_weight=1):
+def run(cnn, mean, std, content_img, style_img, input_img,
+        num_steps=300, style_weight=1, content_weight=1,
+            content_layers=content_layer_default, style_layers=style_layer_default):
     model, style_losses, content_losses = get_style_model_and_losses(
-        cnn, mean, std, style_img, content_img, content_layer_default, style_layer_default
+        cnn, mean, std, style_img, content_img, content_layers, style_layers
     )
     optimizer = get_input_optimizer(input_img)
 
