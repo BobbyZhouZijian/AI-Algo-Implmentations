@@ -90,7 +90,7 @@ class BayesianOpitmizer:
         elif self.acq == 'ei':
             probs = a * norm.cdf(z) + std * norm.pdf(z)
         elif self.acq == 'ucb':
-            probs = mu + (1.0 if self.is_max else -1.0) * self.kappa * std
+            probs = mu + self.kappa * std
         else:
             raise ValueError('acquisition not recognized')
         return probs

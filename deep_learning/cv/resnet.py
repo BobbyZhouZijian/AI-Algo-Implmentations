@@ -233,7 +233,8 @@ if __name__ == '__main__':
         transform=transform,
         download=download
     )
-    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    device = 'cpu'
     print(f'using {device} as the training device...')
     net = ModelTrainer(device=device)
     net.train(train_data, 10)
