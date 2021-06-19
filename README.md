@@ -28,6 +28,7 @@ Example of testing command:
                     - Neural Style Transfer
             - NLP
                 - RNN
+                - word2vec  
                 - BERT (TODO)
     - Regressions
         - (TODO)
