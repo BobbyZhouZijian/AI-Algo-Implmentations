@@ -22,7 +22,7 @@ class GeneratorNet(nn.Module):
             nn.BatchNorm2d(64),
             nn.LeakyReLU(0.2, inplace=True),
             nn.Conv2d(64, num_channels, 3, stride=1, padding=1),
-            nn.Tanh()
+            nn.Sigmoid(),
         )
 
     def forward(self, x):
@@ -98,7 +98,7 @@ def train(data_loader, img_size, in_channels, lr=2e-4, num_epochs=10, device='cp
             fake_target = torch.Tensor(images.shape[0], 1).fill_(0.0).to(device)
 
             g_opt.zero_grad()
-            z = Variable(torch.normal(0, 1, size=(images.shape[0], latent_size)).to(device))
+            z = torch.normal(0, 1, size=(images.shape[0], latent_size)).to(device)
             gen = generator(z)
 
             g_loss = criterion(discriminator(gen), real_target)
@@ -120,8 +120,8 @@ def train(data_loader, img_size, in_channels, lr=2e-4, num_epochs=10, device='cp
     print("saving models")
     gen_state = generator.state_dict()
     disc_state = discriminator.state_dict()
-    torch.save(gen_state, './gan_models/gen_model.pth')
-    torch.save(disc_state, './gan_models/disc_model.pth')
+    torch.save(gen_state, './gan_models/gen_model_2.pth')
+    torch.save(disc_state, './gan_models/disc_model_2.pth')
     print("models saved")
 
 
@@ -133,23 +133,18 @@ def test(model, latent_size):
 
 
 if __name__ == '__main__':
-    transform = transforms.Compose([
-        transforms.Resize(32),
-        transforms.ToTensor(),
-        transforms.Normalize([0.5], [0.5])
-    ])
-    dataset = torchvision.datasets.MNIST(
+    dataset = torchvision.datasets.CIFAR10(
         root='../../data/',
         train=True,
-        transform=transform,
+        transform=transforms.ToTensor(),
         download=False
     )
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=64, shuffle=True, pin_memory=True)
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     print(f"using {device} as training device")
-    # train(train_loader, 32, 1, num_epochs=100, device=device)
+    train(train_loader, 32, 3, num_epochs=100, device=device)
     latent_size = 100
-    model = GeneratorNet(32, 1, latent_size).to(device)
-    state = torch.load('./gan_models/gen_model.pth')
+    model = GeneratorNet(32, 3, latent_size).to(device)
+    state = torch.load('./gan_models/gen_model_2.pth')
     model.load_state_dict(state)
     test(model, latent_size)
