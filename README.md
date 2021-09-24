@@ -22,8 +22,13 @@ Example of testing command:
                     - RNN (for image classifications)
                 - Det
                     - YOLO (v3)
+                - Generative Models
+                    - PixelCNN
+                - Others
+                    - Neural Style Transfer
             - NLP
                 - RNN
+                - word2vec  
                 - BERT (TODO)
     - Regressions
         - (TODO)
