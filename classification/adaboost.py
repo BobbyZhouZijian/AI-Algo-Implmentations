@@ -2,9 +2,9 @@
 Adaboost builds on the idea that a series of weak classifiers
 can be aggregated and form a strong classifier.
 
-More specifically, let each weak classifier be H_k,
-let the weightage assigned to each weak classifier be alpha_k,
-then the strong classifier is just H = sum of (H_k * alpha_k)
+The strong classifier can be expressed as
+
+F(alpha, beta) = sum of alpha_k * f(x, beta_k)
 
 To calculate the alphas, we assign each training data a weight, and
 update the weights based on how well each weak classifier classifies the samples.
@@ -13,8 +13,10 @@ The formula for the kth weak classifier:
     error = sum of (w_i * 1[incorrect prediction])
     alpha_k = 0.5 * log((1-error)/error)
 
-    updated weight = weight * exp{-yi * alpha_k * H_k(x)} / Z
+    updated weight of data = weight * exp{-yi * alpha_k * H_k(x)} / Z
     where Z is a normalizer: Z = sum of (updated weight)
+
+    record weight of the kth weaker classifier: alpha_k
 """
 
 import math
@@ -37,10 +39,10 @@ class Adaboost:
     def create_tree(self, random_state=2021):
         return DecisionTreeClassifier(max_depth=self.max_depth, random_state=random_state)
 
-    def calc_ek(self, weights, diff, method='linear'):
+    def calc_ek(self, diff, method='linear'):
         # maxm of the difference
         abs_diff = abs(diff)
-        E = abs_diff.max()
+        E = abs_diff.max() + 1e-8
         if method == 'linear':
             return abs_diff / E
         if method == 'square':
@@ -61,7 +63,7 @@ class Adaboost:
         for i in range(self.n_estimators):
             self.trees[i].fit(self.train_x, self.train_y, sample_weight=weights)
             pred = self.trees[i].predict(self.train_x)
-            ek = self.calc_ek(weights, self.train_y - pred, method=loss)
+            ek = self.calc_ek(self.train_y - pred, method=loss)
             error = np.dot(weights, ek)
             alpha = np.log((1. - error) / error)
 
